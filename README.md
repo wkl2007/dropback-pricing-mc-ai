@@ -2,6 +2,8 @@
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://dropback-pricing-mc-ai.streamlit.app/)
 
+> 🏆 **Accepted for publication in the 2026 2nd International Conference on Financial Innovation and Marketing Management (FIMM).**
+
 This repository provides a high-performance framework for pricing USD Drop-Back Certificates. It implements a comparative analysis between traditional numerical methods (Monte-Carlo) and a machine learning-based surrogate model (Multi-Layer Perceptron).
 
 ## 🔑 Core Methodology
