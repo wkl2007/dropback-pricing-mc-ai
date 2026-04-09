@@ -32,5 +32,5 @@ Access the live interactive dashboard here:
 2. Launch the application:  
    `streamlit run app.py`
 
-## 💻 Project Lead & Implementation
+## 💻 Project Creator
 - **Kaili Wang** (New York University)
