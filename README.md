@@ -32,11 +32,5 @@ Access the live interactive dashboard here:
 2. Launch the application:  
    `streamlit run app.py`
 
-## 👥 Credits
-
-### 💻 Project Lead & Implementation
-- **Kaili Wang** (New York University Shanghai)
-  - *Responsible for system architecture, data engineering, model training, and cloud deployment.*
-
-### 📄 Research & Methodology (Paper Authors)
-- Haocheng Fu, Zhourui Shen, **Kaili Wang**, Jingheng Xu
+## 💻 Project Lead & Implementation
+- **Kaili Wang** (New York University)
