@@ -5,6 +5,7 @@ import os
 import math
 import random
 import pandas as pd
+import plotly.graph_objects as go
 
 # App configuration
 st.set_page_config(page_title="Drop-Back Pricing AI", layout="wide")
@@ -24,8 +25,8 @@ def load_model():
 
 ai_model = load_model()
 
-# Traditional Monte Carlo engine with UI progress hooks
-def run_traditional_mc_with_progress(sigma, progress_bar, status_text):
+# Traditional Monte Carlo engine with UI progress hooks and Histogram
+def run_traditional_mc_with_progress(sigma, progress_bar, status_text, chart_placeholder):
     r, q, T = 0.02, 0.018, 3.0
     steps_per_year = 252
     N = int(T * steps_per_year)
@@ -72,6 +73,30 @@ def run_traditional_mc_with_progress(sigma, progress_bar, status_text):
         path_values.append((equity_part + cash + accrued_interest) * discount_factor)
 
     progress_bar.progress(1.0)
+    
+    # Generate Payoff Distribution Histogram AFTER computation
+    fig = go.Figure(data=[go.Histogram(
+        x=path_values, 
+        nbinsx=100, 
+        marker_color='#1E90FF', # Sleek Dodger Blue
+        opacity=0.75,
+        hovertemplate='Price: $%{x:.2f}<br>Count: %{y}<extra></extra>'
+    )])
+    
+    fig.update_layout(
+        title="Monte Carlo Payoff Distribution",
+        title_font_size=14,
+        xaxis_title="Option Present Value (USD)",
+        yaxis_title="Frequency (Paths)",
+        bargap=0.05,
+        height=300,
+        margin=dict(l=0, r=0, t=30, b=0),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)'
+    )
+    
+    chart_placeholder.plotly_chart(fig, use_container_width=True)
+    
     return sum(path_values) / len(path_values)
 
 # Sidebar parameters
@@ -80,9 +105,7 @@ with st.sidebar:
     user_sigma = st.slider("Volatility (Sigma)", min_value=0.1500, max_value=0.4500, value=0.2000, step=0.0050, format="%.4f")
     
     st.markdown("---")
-    st.write("📖 **Paper Authors:**")
-    st.write("Haocheng Fu, Zhourui Shen, Kaili Wang, Jingheng Xu")
-    st.write("💻 **Web App Developer:**")
+    st.write("💻 **Developed by:**")
     st.write("**Kaili Wang**")
 
 st.markdown("<br>", unsafe_allow_html=True)
@@ -96,6 +119,7 @@ with col1:
     st.subheader("⚙️ Traditional Monte-Carlo")
     st.write("Runs 50,000 paths utilizing CPU.")
     mc_container = st.empty()
+    mc_chart_container = st.empty() # Placeholder for the Histogram
 
 with col2:
     st.subheader("🧠 Neural Surrogate Model")
@@ -124,7 +148,7 @@ if start_race:
             status_text.info("⏳ CPU is computing (approx. 20-60s depending on CPU)...")
             
             mc_start_time = time.time()
-            mc_price = run_traditional_mc_with_progress(user_sigma, progress_bar, status_text)
+            mc_price = run_traditional_mc_with_progress(user_sigma, progress_bar, status_text, mc_chart_container)
             mc_time = time.time() - mc_start_time
             
             progress_bar.empty()
@@ -148,3 +172,17 @@ if start_race:
             st.metric(label="🚀 AI Speedup Multiplier", value=f"{speedup_multiplier:,}x Faster", help="How many times faster the AI is compared to Monte-Carlo.")
         with rep_col2:
             st.metric(label="🎯 Relative Pricing Error", value=f"{pct_error:.4f}%", delta=f"Abs Diff: ${abs_error:.4f}", delta_color="off", help="The percentage deviation between the AI model and the traditional Monte-Carlo calculation.")
+
+        # Academic Metrics Expander
+        with st.expander("Model Architecture & Paper Metrics", expanded=False):
+            st.markdown("""
+            **Neural Surrogate Model Architecture:**
+            - **Type:** Multi-Layer Perceptron (MLP) Regressor
+            - **Hidden Layers:** (64, 64) with ReLU activation
+            - **Training Data:** 2,000 sets of Monte-Carlo simulated pricing data
+            
+            **Out-of-Sample Performance (from paper):**
+            - **Mean Absolute Error (MAE):** 1.9776
+            - **Root Mean Square Error (RMSE):** 2.3295
+            - **Conclusion:** The GenAI model effectively learns the mapping relationship between parameters and expected present value, serving as a reliable and ultra-fast enhancement tool for traditional Monte Carlo engines.
+            """)
